@@ -102,6 +102,27 @@ export const makeGroupsSocket = (config: SocketConfig) => {
 			)
 			return extractGroupMetadata(result)
 		},
+		groupCreateCommunity: async(subject: string, participants: string[]) => {
+			const key = generateMessageID()
+			const result = await groupQuery(
+				'@g.us',
+				'set',
+				[
+					{
+						tag: 'create-community',
+						attrs: {
+							subject,
+							key
+						},
+						content: participants.map(jid => ({
+							tag: 'participant',
+							attrs: { jid }
+						}))
+					}
+				]
+			)
+			return extractGroupMetadata(result)
+		},
 		groupLeave: async(id: string) => {
 			await groupQuery(
 				'@g.us',

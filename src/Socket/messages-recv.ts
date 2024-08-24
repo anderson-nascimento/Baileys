@@ -257,10 +257,9 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 		msg: Partial<proto.IWebMessageInfo>
 	) => {
 		const participantJid = getBinaryNodeChild(child, 'participant')?.attrs?.jid || participant
+		const metadata = extractGroupMetadata(child)
 		switch (child?.tag) {
-		case 'create':
-			const metadata = extractGroupMetadata(child)
-
+		case 'create':		
 			msg.messageStubType = WAMessageStubType.GROUP_CREATE
 			msg.messageStubParameters = [metadata.subject]
 			msg.key = { participant: metadata.owner }
@@ -275,6 +274,21 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 				author: participant
 			}])
 			break
+		case 'create-community':
+			msg.messageStubType = WAMessageStubType.COMMUNITY_CREATE
+			msg.messageStubParameters = [metadata.subject]
+			msg.key = { participant: metadata.owner }
+
+			ev.emit('chats.upsert', [{
+				id: metadata.id,
+				name: metadata.subject,
+				conversationTimestamp: metadata.creation,
+			}])
+			ev.emit('groups.upsert', [{
+				...metadata,
+				author: participant
+			}])
+			break	
 		case 'ephemeral':
 		case 'not_ephemeral':
 			msg.message = {
