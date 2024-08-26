@@ -64,7 +64,7 @@
     "@adiwajshing/eslint-config": "github:adiwajshing/eslint-config",
     "@types/got": "^9.6.11",
     "@types/jest": "^27.5.1",
-    "@types/node": "^16.0.0",
+    "@types/node": "^16.18.100",
     "@types/sharp": "^0.29.4",
     "@types/ws": "^8.0.0",
     "conventional-changelog-cli": "^2.2.2",
