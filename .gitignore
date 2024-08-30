@@ -1,9 +1,11 @@
 .DS_Store
+.vscode
 .env
 .yarn/
 *.tgz
 */.DS_Store
 auth_info*.json
+auth_info_baileys*
 baileys_auth_info*
 baileys_store*.json
 browser-messages.json

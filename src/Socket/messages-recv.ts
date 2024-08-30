@@ -274,21 +274,6 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 				author: participant
 			}])
 			break
-		case 'create-community':
-			msg.messageStubType = WAMessageStubType.COMMUNITY_CREATE
-			msg.messageStubParameters = [metadata.subject]
-			msg.key = { participant: metadata.owner }
-
-			ev.emit('chats.upsert', [{
-				id: metadata.id,
-				name: metadata.subject,
-				conversationTimestamp: metadata.creation,
-			}])
-			ev.emit('groups.upsert', [{
-				...metadata,
-				author: participant
-			}])
-			break	
 		case 'ephemeral':
 		case 'not_ephemeral':
 			msg.message = {
