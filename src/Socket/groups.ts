@@ -81,6 +81,106 @@ export const makeGroupsSocket = (config: SocketConfig) => {
 	return {
 		...sock,
 		groupMetadata,
+		createCommunity: async (subject: string, description: string) => {
+			const key = generateMessageID()
+			const result = await groupQuery(
+				'@g.us',
+				'set',
+				[
+					{
+						tag: 'create',
+						attrs: {
+							subject,
+						},
+						content: [
+							{
+								tag: "description",
+								attrs: {
+									id: key,
+								},
+								content: [
+									{
+										tag: "body",
+										attrs: {},
+										content: Buffer.from(description, "utf-8"),
+									},
+								],
+							},
+							{
+								tag: "parent",
+								attrs: {
+									default_membership_approval_mode: "request_required",
+								},
+							},
+						],
+					}
+				]
+			)
+			return extractGroupMetadata(result)
+		},
+		communitySettingUpdate: async (jidCommunity: string, setting: 'anyone' | 'admin') => {
+			const result = await groupQuery(
+				jidCommunity,
+				'set',
+				[
+					{
+						tag: setting === 'anyone' ? 'allow_non_admin_sub_group_creation' : 'not_allow_non_admin_sub_group_creation',
+						attrs: {}
+					}
+				]
+			)
+
+			return { status: '201' }
+		},
+		linkGroupsToCommunity: async (jidCommunity: string, participants: string[]) => {
+			const result = await groupQuery(
+				jidCommunity,
+				'set',
+				[
+					{
+						tag: 'links',
+						attrs: {},
+						content: [
+							{
+								tag: 'link',
+								attrs: { link_type: "sub_group" },
+								content: participants.map(jid => ({
+									tag: 'group',
+									attrs: { jid }
+								}))
+							}
+						],
+					},
+				]
+			)
+			const node = getBinaryNodeChild(result, 'links')
+			const link = getBinaryNodeChild(node, 'link')
+			const group = getBinaryNodeChildren(link, 'group')
+			return group.map(l => {
+				return { status: l.attrs.error || '200', jid: l.attrs.jid }
+			})
+		},
+		unlinkGroupsToCommunity: async (jidCommunity: string, jidGroup: string) => {
+			const result = await groupQuery(
+				jidCommunity,
+				'set',
+				[
+					{
+						tag: 'unlink',
+						attrs: { unlink_type: 'sub_group' },
+						content: [
+							{
+								tag: 'group',
+								attrs: { jid: jidGroup }
+							}
+						],
+					},
+				]
+			)
+			const node = getBinaryNodeChild(result, 'unlink')
+			const group = getBinaryNodeChild(node, 'group')
+			return group?.attrs.jid
+		},
 		groupCreate: async(subject: string, participants: string[]) => {
 			const key = generateMessageID()
 			const result = await groupQuery(

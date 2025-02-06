@@ -1,6 +1,7 @@
 .DS_Store
 .env
 .yarn/
+*.lock
 *.tgz
 */.DS_Store
 auth_info*.json
@@ -18,3 +19,5 @@ Proxy
 test.ts
 TestData
 wa-logs.txt
+package-lock.json
+auth_info_baileys
